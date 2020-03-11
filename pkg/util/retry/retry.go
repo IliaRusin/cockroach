@@ -96,7 +96,11 @@ func (r Retry) retryIn() time.Duration {
 	// Get a random value from the range [backoff - delta, backoff + delta].
 	// The formula used below has a +1 because time.Duration is an int64, and the
 	// conversion floors the float64.
-	return time.Duration(backoff - delta + rand.Float64()*(2*delta+1))
+	td := time.Duration(backoff - delta + rand.Float64()*(2*delta+1))
+	if maxBackoff := r.opts.MaxBackoff; td > maxBackoff {
+		td = maxBackoff
+	}
+	return td
 }
 
 // Next returns whether the retry loop should continue, and blocks for the
